@@ -1,0 +1,4 @@
+ARDUINO_UNO_BOX-Body.stl
+ARDUINO_UNO_BOX-Lid.stl
+
+credits to: https://makerworld.com/it/@sgenos
