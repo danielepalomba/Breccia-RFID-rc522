@@ -71,7 +71,7 @@ We specifically will implement:
 
 Below is the function to be able to change the default key A
 
-```cpp=
+```cpp
 /**
  * 
  * 
