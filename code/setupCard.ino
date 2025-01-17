@@ -1,7 +1,3 @@
-//cambio la chiave A
-// disabilito la chiave B
-//Scrivo il nome nella scheda
-
 #include <MFRC522.h>
 #include <MFRC522Extended.h>
 #include <deprecated.h>
