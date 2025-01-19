@@ -1,3 +1,4 @@
+#include <AES.h>
 #include <MFRC522.h>
 #include <MFRC522Extended.h>
 #include <deprecated.h>
@@ -13,8 +14,27 @@
 
 MFRC522 mfrc522(SS_PIN, RST_PIN);
 
-MFRC522::MIFARE_Key defaultKey = {{0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF}};
-MFRC522::MIFARE_Key newKey = {{0xA1, 0xB2, 0xC3, 0xD4, 0xE5, 0xF6}};
+//1. Setup key A
+//MFRC522::MIFARE_Key defaultKey = {{0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF}};
+MFRC522::MIFARE_Key newKey = {{0xA1, 0xB2, 0xC3, 0xD4, 0xE5, 0xF6}}; //key A
+MFRC522::MIFARE_Key defaultKey = {{0xA1, 0xB2, 0xC3, 0xD4, 0xE5, 0xF6}}; //key A
+
+//2. Setup AES key
+const byte aesKey[16] = { 0xA1, 0xB2, 0xC3, 0xD4, 0xE5, 0xF6, 0x01, 0x23,
+                          0x34, 0x45, 0x56, 0x67, 0x78, 0x89, 0x9A, 0xAB };
+
+//3. Setup the unique code
+byte uniqueId[16] = "0123456789089786";
+
+//4. Setup the name of the card
+byte cardName[16] = "User";
+
+/*After everything is set up, you can load the sketch onto your board and follow 
+the instructions that are shown to you on the serial port.
+Remember not to remove the card from the reader immediately, but to keep it until you are asked.
+*/
+
+AES128 aes;
 
 void setup() {
   Serial.begin(9600);
@@ -43,8 +63,10 @@ void loop() {
     Serial.println("Error in disabling key B.");
   }
 
-  writeBlock(UNIQUE_ID, "dn3tj878qwddxoty"); //16 char random string 
-  writeBlock(CARD_NAME, "User"); //Insert card's name here
+  byte encryptedUniqueId[16];
+  encryptData(uniqueId, encryptedUniqueId);
+  writeBlock(UNIQUE_ID, encryptedUniqueId); 
+  writeBlock(CARD_NAME, cardName);
 
   Serial.println("You can now remove the card");
   mfrc522.PICC_HaltA();     
@@ -52,8 +74,6 @@ void loop() {
 }
 
 /**
- * 
- * 
  * @param oldKey Current key
  * @param newKey New key
  * @return true if all changes were successful, false otherwise
@@ -133,8 +153,6 @@ bool disableKeyBForAllSectors() {
 }
 
 /**
- * 
- * 
  * @param blockAddr memory block to write
  * @param message msg to save
  * @return returns true if the writing is ok, false otherwise
@@ -160,4 +178,13 @@ bool writeBlock(byte blockAddr, const char* message) {
     Serial.println("Write() failed");
   }
   return false;
+}
+
+/**
+* @param plainText string in plain text
+* @param cipherText encrypted string
+*/
+void encryptData(const byte* plainText, byte* cipherText) {
+  aes.setKey(aesKey, 16);
+  aes.encryptBlock(cipherText, plainText);
 }

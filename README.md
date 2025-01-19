@@ -19,7 +19,7 @@
 | MOSI | D11     |
 | MISO | D12     |
 | GND  | GND     |
-| RST  | 9       |
+| RST  | D9      |
 | VCC  | 3.3V    |
 
 ![Connection diagram](img/RC522-RFID-Module-Pin-Diagram-Pinout.png)
@@ -67,14 +67,12 @@ It is important to point out that MIFARE 1K cards use Crypto-1 encryption techno
 We specifically will implement:
 - Custom security key A
 - Disable security key B
-- Adding a unique code in addition to just the uid of the RFID card.
+- Adding an **encrypted unique code** in addition to just the uid of the RFID card.
 
 Below is the function to be able to change the default key A
 
 ```cpp
 /**
- * 
- * 
  * @param oldKey Current key
  * @param newKey New key
  * @return true if all changes were successful, false otherwise
@@ -158,5 +156,25 @@ bool disableKeyBForAllSectors() {
 }
 ```
 
-These functions are found in the *setupCard.ino* file. File that allows the initialization of a new card. All you have to do is provide a new unique string of 16 characters and enter the name of the card.
+These functions are found in the *setupCard.ino* file.
 
+## Initializing a card
+
+To initialize our first card, we need to open the *setupCard.ino* file and set the following global variables:
+- The **key A** to change the default one.
+- The AES key to encrypt the unique code.
+- Enter the unique code
+- Enter the name of the card  
+
+**WARNING: The AES key must be the same in both main.ino and setupCard.ino, otherwise you will not be able to decrypt the data.**  
+Once the card is initialized, all you have to do is read the hash via the *main.ino* sketch and add this to the authorized list.
+
+Once you have started the board with the main.ino code, you should see an error like this and the buzzer should sound:
+
+![auth1](img/auth1.png)
+
+All normal, now copy and paste this hash by adding it to the authorized. Reload the sketch and try the card again.
+
+![auth2](img/auth2.png)
+
+RFID is ready, now all you have to do is connect the relay to the circuit you want to control and **have fun**. 
